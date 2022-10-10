@@ -1,4 +1,5 @@
 from flask_restful import Resource, reqparse
+from models.player import PlayerModel
 
 players = [
   {
@@ -41,43 +42,49 @@ class Players(Resource):
     return {'Players': players}
 
 class Player(Resource):
-  def get(self, player_id):
+  arguments = reqparse.RequestParser()
+  arguments.add_argument('name')
+  arguments.add_argument('position')
+  arguments.add_argument('team')
+  arguments.add_argument('shirt')
+  arguments.add_argument('height')
+  arguments.add_argument('weight')
+  arguments.add_argument('gols')
+  arguments.add_argument('stars')
+
+  def find_player(player_id):
     for player in players:
       if player['player_id'] == player_id:
         return player
+    return None
+
+  def get(self, player_id):
+    player = Player.find_player(player_id)
+    if player:
+      return player
     return {'message': 'Player not found'}, 404
 
   def post(self, player_id):
-    argumentos = reqparse.RequestParser()
-    argumentos.add_argument('player_id')
-    argumentos.add_argument('name')
-    argumentos.add_argument('position')
-    argumentos.add_argument('team')
-    argumentos.add_argument('shirt')
-    argumentos.add_argument('height')
-    argumentos.add_argument('weight')
-    argumentos.add_argument('gols')
-    argumentos.add_argument('stars')
 
-    dados = argumentos.parse_args()
-
-    new_player = {
-      'player_id': player_id,
-      'name': dados['name'],
-      'position': dados['position'],
-      'team': dados['team'],
-      'shirt': dados['shirt'],
-      'height': dados['height'],
-      'weight': dados['weight'],
-      'gols': dados['gols'],
-      'stars': dados['stars']
-    }
-
+    dates = Player.arguments.parse_args()
+    player_object = PlayerModel(player_id, **dates)
+    new_player = player_object.json()
     players.append(new_player)
     return new_player, 200
 
-  def post(self, id):
-    pass
+  def put(self, player_id):
 
-  def delete(self, id):
-    pass
+    dates = Player.arguments.parse_args()
+    player_object = PlayerModel(player_id, **dates)
+    new_player = player_object.json()
+    player = Player.find_player(player_id)
+    if player:
+      player.update(new_player)
+      return new_player, 200
+    players.append(new_player)
+    return new_player, 201
+
+  def delete(self, player_id):
+    global players
+    players = [player for player in players if player['player_id'] != player_id]
+    return {'message': 'Player deleted'}
