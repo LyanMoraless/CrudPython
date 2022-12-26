@@ -1,5 +1,6 @@
 from flask_restful import Resource, reqparse
 from models.player import PlayerModel
+from factory import Factory
 
 players = [
   {
@@ -38,7 +39,8 @@ players = [
 ]
 
 class Players(Resource):
-  def get(self):
+  def get(self): 
+    players = Factory().select("SELECT * FROM test;") 
     return {'Players': players}
 
 class Player(Resource):

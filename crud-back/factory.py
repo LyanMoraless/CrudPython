@@ -14,11 +14,10 @@ class Factory:
     self.conn.commit()
     self.close_connections()
 
-
-  def select(self):
-    self.cur.execute("SELECT * FROM test;")
+  def select(self, query):
+    self.cur.execute(query)
     data = self.cur.fetchone()
-    self.conn.commit()
+    self.conn.commit() 
     print(data)
     self.close_connections()
 
